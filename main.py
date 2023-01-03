@@ -11,7 +11,7 @@ import spacy
 import os
 nlp = spacy.load("en_core_web_sm")
 
-from flask import Flask, Response, request, jsonify
+from flask import Flask, Response, request
 app = Flask(__name__)
 import pymongo
 import json
@@ -71,7 +71,11 @@ def create_user_article():
         
         data = get_data(name)
         if data == 0:
-            return  jsonify({"message":"no articles found with this name"})
+            return Response(
+                response = json.dumps({"message":"no articles found with this name"}),
+                status = 200,
+                mimetype = "application/json"
+            )
         df = pd.DataFrame(data)
 
         a = []
@@ -117,10 +121,17 @@ def create_user_article():
 
         print(dbResponse.inserted_id)
         # print(new)
-        return jsonify(db.users.find_one({"name": name},{"_id" : False}))
+        return Response(
+                response = json.dumps(db.users.find_one({"name": name},{"_id" : False})),
+                status = 200,
+                mimetype = "application/json"
+            )
     except Exception as ex :
         print(ex)
-        return jsonify({"message":"cannot read users"})
+        return Response(
+            response = json.dumps({"message":"cannot read users"}),
+            status = 500,
+            mimetype = "application/json")
 
 
 @app.route("/getusers", methods = ["POST"])
@@ -129,11 +140,17 @@ def get_some_users():
     try: 
         data = db.users.find_one({"name": request.form["name"]}, {"_id" : False})
 
-        return jsonify(data)
+        return Response(
+            response = json.dumps(data),
+            status = 200,
+            mimetype = "application/json")
     
     except Exception as ex:
         print(ex)
-        return jsonify({"message":"cannot read users"})
+        return Response(
+            response = json.dumps({"message":"cannot read users"}),
+            status = 500,
+            mimetype = "application/json")
 
 
 
