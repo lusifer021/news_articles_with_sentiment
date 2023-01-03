@@ -1,0 +1,11 @@
+beautifulsoup4==4.11.1
+Flask==2.2.2
+newsapi-python
+numpy==1.24.1
+pandas==1.5.2
+pymongo==4.3.3
+requests==2.28.1
+textblob==0.17.1
+html5lib
+spacy>=3.0.0,<4.0.0
+en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.4.0/en_core_web_sm-3.4.0-py3-none-any.whl
