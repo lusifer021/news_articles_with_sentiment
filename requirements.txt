@@ -7,11 +7,11 @@ pymongo==4.3.3
 requests==2.28.1
 textblob==0.17.1
 html5lib
-click==7.1.2
-gunicorn==20.0.4
-itsdangerous==1.1.0
+click
+gunicorn
+itsdangerous
 Jinja2
-MarkupSafe==1.1.1
-Werkzeug==1.0.1
+MarkupSafe
+Werkzeug
 spacy>=3.0.0,<4.0.0
 en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.4.0/en_core_web_sm-3.4.0-py3-none-any.whl
