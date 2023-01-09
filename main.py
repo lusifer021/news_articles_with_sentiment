@@ -11,13 +11,13 @@ import spacy
 import os
 nlp = spacy.load("en_core_web_sm")
 import nltk
-# from nltk.tokenize import word_tokenize
-# from nltk.tag import pos_tag
-# nltk.download('punkt')
-# nltk.download('averaged_perceptron_tagger')
+from nltk.tokenize import word_tokenize
+from nltk.tag import pos_tag
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
 import spacy
-# from spacy import displacy
-# from collections import Counter
+from spacy import displacy
+from collections import Counter
 import en_core_web_sm
 nlp = en_core_web_sm.load()
 
@@ -26,7 +26,7 @@ from bs4 import BeautifulSoup
 import numpy as np
 import pandas as pd
 import time 
-# from nltk.tokenize import sent_tokenize
+from nltk.tokenize import sent_tokenize
 
 import spacy
 from spacy.lang.en.stop_words import STOP_WORDS
@@ -48,7 +48,7 @@ except:
     print("ERROR - Cannot connect to db")
 
 
-newsapi = NewsApiClient(api_key='01b1cf475c13462b89997b60b3aa8ee7')
+newsapi = NewsApiClient(api_key='b83687d9c23f43a2badf9e0919be278d')
 
 def get_data(keyword):
     news = []
@@ -132,7 +132,8 @@ def create_user_article():
         a = []
         # news = ""
         # news_list_ner = ""
-        news_all = ""
+        news_all = " "
+        relevant_passages = []
         for i in range(df.shape[0]):
                 
             news = ""
@@ -149,24 +150,71 @@ def create_user_article():
             # News identification using ner
             coverpage_news = soup1.find_all('p')
 
-            for c in coverpage_news:
-                article = nlp (c.text)
+
+            cov=[]
+            # coverpage_news = str(coverpage_news)
+            for t in coverpage_news:
+                cov.append(t.text)
+
+            cov = " ".join(cov)
+
+            coverpage = cleanhtml(cov)
+
+            text = coverpage
+            # text = str(text)
+            lst = sent_tokenize(text)
+            min = []
+            flag=0
+            for i in lst:
+                article = nlp(i)
+                if(flag==1):
+                    for word in article.ents:
+                        if (word.pos_ == "PRON"):
+                            min.append(i)
+                            # flag=0
                 for ent in article.ents:
-                    if (ent.label_=="PERSON") & ((ent.text == name) | (ent.text in name.split(' '))):
-                        news_list_ner = news_list_ner + " " + c.text
-                # print(c.text)
-                news = news + " " + c.text
+                    if (ent.label_ == "PERSON" and ent.text == name): ##or func(name,ent.text) or (ent.text in name.split(' '))  #and ent.text == "Anthony Albanese"
+                        min.append(i)
+                        flag=1
+                    else:
+                        flag=0
 
+            min = [*set(min)]
+            # min = list(min)
+            relevant_passages.append(min)
 
-            news_all = news_all + " " + news_list_ner
+            final_list=[]
+            for i in relevant_passages:
+                for j in i:
+                    final_list.append(j)
+
+            final_str = ''
+            for i in final_list:
+                final_str+=i
+
+            # for c in coverpage_news:
+            #     article = nlp (c.text)
+            #     for ent in article.ents:
+            #         if (ent.label_=="PERSON") & ((ent.text == name) | (ent.text in name.split(' '))):
+            #             news_list_ner = news_list_ner + " " + c.text
+            #     # print(c.text)
+            #     news = news + " " + c.text
+
+            news = news + " " + final_str
+            # news_all = news_all + " " + news_list_ner
             # print(df['published'])
-            if(len(news_list_ner)> 1):
-                result = sentiment(news_list_ner)
-                a.append({"test" : news_list_ner, "date" : df["published"][i], "sentiment" : result})
+            if(len(final_str)> 1):
+                result = sentiment(final_str)
+                a.append({"test" : final_str, "date" : df["published"][i], "sentiment" : result})
             
-        main_result = sentiment(news_all)
+        main_result = sentiment(news)
+        if( len(a) ==0):
+            return Response(
+            response = json.dumps({"message": 0}),
+            status = 500,
+            mimetype = "application/json")
 
-        new = { "name" : name,  "articles": a , "sentiment_analysis" : main_result, "summary" : summarize(news_all)}
+        new = { "name" : name,  "articles": a , "sentiment_analysis" : main_result, "summary" : summarize(news)}
         # print(name)
         dbResponse = db.users.insert_one(new)
 
