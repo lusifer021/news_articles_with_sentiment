@@ -48,7 +48,7 @@ except:
     print("ERROR - Cannot connect to db")
 
 
-newsapi = NewsApiClient(api_key='b83687d9c23f43a2badf9e0919be278d')
+newsapi = NewsApiClient(api_key='977653ce268a4d6987ff737a4d238684')
 
 def get_data(keyword):
     news = []
